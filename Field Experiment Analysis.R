@@ -1,16 +1,24 @@
-library(tidyverse)
-library(dplyr)
-library(haven)
-library(Rmisc)
-library(broom)
-library(ggpubr)
-library(estimatr)
-library(sjPlot)
-library(margins)
-library(stargazer)
-library(miceadds)
-library(lmtest)
-library(multiwayvcov)
+### Install and load all relevant packages for all analyses ###
+
+# List of packages to load
+packages <- c(
+  "tidyverse", "dplyr", "haven", "Rmisc", "ggpubr", 
+  "broom", "estimatr", "sjPlot", "lmtest", 
+  "margins", "stargazer", "miceadds", "multiwayvcov", "jtools"
+)
+
+# Function to check and install packages
+install_and_load <- function(package_name) {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    install.packages(package_name, dependencies = TRUE)
+  }
+  library(package_name, character.only = TRUE)
+}
+
+# Load and install packages
+lapply(packages, install_and_load)
+
+
 
 
 ## cleaning
@@ -162,25 +170,32 @@ allplot <- glm(response ~ treatment,
 summary(allplot)
 
 
-### Manuscript Figure ###
-plot1 <- plot_model(allplot, 
-                    type = "pred", 
-                    ci.lvl = 0.95, 
-                    title = "", 
-                    axis.title = c("Treatment Condition", 
-                                   "Probability of Response"),
-                    dot.size = 20, 
-                    line.size = 5)
-plot1
+### Manuscript Figure ### 
+#plot1 <- plot_model(allplot,
+#                    type = "pred",
+#                    ci.lvl = 0.95, 
+#                    title = "", 
+#                    axis.title = c("Treatment Condition", 
+#                                   "Probability of Response"),
+#                    dot.size = 20, 
+#                    line.size = 5)
+#plot1
 
-plot1[[1]] +
-  ylim(.35, .55) +
-  theme_grey(base_size = 20) +
-  geom_hline(yintercept = .45, color = "red", size = 1, linetype='dotted') +
-  geom_hline(yintercept = .5, color = "red", size = 1, linetype='dotted') +
-  geom_hline(yintercept = .4, color = "red", size = 1, linetype='dotted') +
-  geom_hline(yintercept = .55, color = "red", size = 1, linetype='dotted') +
-  geom_hline(yintercept = .35, color = "red", size = 1, linetype='dotted')
+#plot1[[1]] +
+#  ylim(.35, .55) +
+#  theme_grey(base_size = 20) +
+#  geom_hline(yintercept = .45, color = "red", size = 1, linetype='dotted') +
+#  geom_hline(yintercept = .5, color = "red", size = 1, linetype='dotted') +
+#  geom_hline(yintercept = .4, color = "red", size = 1, linetype='dotted') +
+#  geom_hline(yintercept = .55, color = "red", size = 1, linetype='dotted') +
+#  geom_hline(yintercept = .35, color = "red", size = 1, linetype='dotted')
+
+### The code above, which was used for the manuscript figure, does not work anymore with the newer versions of sjPlot. 
+### Plotting the relationship with "effect_plot" from jtools instead gives the same graph 
+### Only the layout is slightly different, but the results are identical
+
+plot1 <- effect_plot(allplot, pred = treatment, interval = TRUE)
+plot1
 
 
 ### ###
@@ -198,58 +213,4 @@ aptab2 <- allfixed
 
 stargazer(aptab1, aptab2, type = "html", out = "clusteredandfixed.html")
 
-# sub plots
-leftplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = left)
-plot2 <- plot_model(leftplot, type = "pred", ci.lvl = 0.95, title = "The Left", axis.title = c("Treatment", "Probability of Response"))
-
-spdplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = spd)
-plot3 <- plot_model(spdplot, type = "pred", ci.lvl = 0.95, title = "SPD", axis.title = c("Treatment", "Probability of Response"))
-
-greenplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = green)
-plot4 <- plot_model(greenplot, type = "pred", ci.lvl = 0.95, title = "The Greens", axis.title = c("Treatment", "Probability of Response"))
-
-fdpplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = fdp)
-plot5 <- plot_model(fdpplot, type = "pred", ci.lvl = 0.95, title = "FDP", axis.title = c("Treatment", "Probability of Response"))
-
-unionplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = union)
-plot6 <- plot_model(unionplot, type = "pred", ci.lvl = 0.95, title = "CDU/CSU", axis.title = c("Treatment", "Probability of Response"))
-
-afdplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = afd)
-plot7 <- plot_model(afdplot, type = "pred", ci.lvl = 0.95, title = "AfD", axis.title = c("Treatment", "Probability of Response"))
-
-issueplot <- glm(response ~ random, 
-                 family = binomial(link = "logit"), 
-                 data = issueowner)
-plot8 <- plot_model(issueplot, type = "pred", ci.lvl = 0.95, title = "Issue Ownership", axis.title = c("Treatment", "Probability of Response"))
-
-noissueplot <- glm(response ~ random, 
-               family = binomial(link = "logit"), 
-               data = noissueowner)
-plot9 <- plot_model(noissueplot, type = "pred", ci.lvl = 0.95, title = "No Issue Ownership", axis.title = c("Treatment", "Probability of Response"))
-
-
-# other plots
-marginplotsingle <- ggarrange(plotlist = c(plot2, plot3, plot4, plot5, plot6, plot7), ncol = 3, nrow = 2)
-marginplotsingle
-
-marginplotgroup <- ggarrange(plotlist = c(plot8, plot9), ncol = 2, nrow = 1)
-marginplotgroup
-
-# plot for manuscript
-plot1
-
-stargazer(leftplot, spdplot, greenplot, fdpplot, unionplot, afdplot, type = "html", out = "Parties.html")
-stargazer(allplot, issueplot, noissueplot, type = "html", out = "Partygroups.html")
 

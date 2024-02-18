@@ -1,12 +1,21 @@
-library(cjoint)
-library(readr)
-library(dplyr)
-library(tidyverse)
-library(Hmisc)
-library(forcats)
-library(wordcloud)
-library(ggpubr)
-library(tidyr)
+### Install and load all relevant packages for all analyses ###
+
+# List of packages to load
+packages <- c(
+  "tidyverse", "dplyr", "cjoint", "readr", "ggpubr", 
+  "Hmisc", "forcats", "wordcloud", "ggpubr"
+)
+
+# Function to check and install packages
+install_and_load <- function(package_name) {
+  if (!requireNamespace(package_name, quietly = TRUE)) {
+    install.packages(package_name, dependencies = TRUE)
+  }
+  library(package_name, character.only = TRUE)
+}
+
+# Load and install packages
+lapply(packages, install_and_load)
 
 
 # Descriptive Analyses
@@ -505,3 +514,4 @@ CJLEFT <- read.csv("CJLEFT.csv")
 LEFTplot <- amce(selected ~ Alter + Beruf + Freizeitaktivität + Geschlecht + Herkunft, data = CJLEFT, baselines = baselines, respondent.id = "respondent", cluster = TRUE)
 
 plot(LEFTplot, ci = .95, colors = "purple", attribute.names = c("Age", "Occupation", "Hobby", "Gender", "Origin"), level.names = levels.eng)
+
