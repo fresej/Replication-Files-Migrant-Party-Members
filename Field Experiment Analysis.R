@@ -3,7 +3,7 @@
 # List of packages to load
 packages <- c(
   "tidyverse", "dplyr", "haven", "Rmisc", "ggpubr", 
-  "broom", "estimatr", "sjPlot", "lmtest", 
+  "broom", "estimatr", "lmtest", 
   "margins", "stargazer", "miceadds", "multiwayvcov", "jtools"
 )
 
@@ -17,7 +17,6 @@ install_and_load <- function(package_name) {
 
 # Load and install packages
 lapply(packages, install_and_load)
-
 
 
 
@@ -171,6 +170,7 @@ summary(allplot)
 
 
 ### Manuscript Figure ### 
+#library(sjPlot)
 #plot1 <- plot_model(allplot,
 #                    type = "pred",
 #                    ci.lvl = 0.95, 
